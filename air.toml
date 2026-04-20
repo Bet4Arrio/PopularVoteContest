@@ -1,0 +1,16 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build  -o ./tmp/web ./cmd/web"
+# Binary file yields from 'cmd', will be deprecated soon, recommend using entrypoint.
+bin = "tmp/web"
+# Entrypoint binary relative to root. First item is the executable, more items are default arguments.
+entrypoint = ["./tmp/web"]
+
+include_ext = ["go", "tpl", "tmpl", "html"]
+
+exclude_dir = []
+
+include_dir = ["views", "cmd", "internal", "config"]
+exclude_file = []

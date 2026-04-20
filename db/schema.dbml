@@ -1,0 +1,56 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table user {
+  id int
+  public_id uuid
+  email string
+  passwordHash string
+  createAt datetime
+  changeAt datetime
+}
+Table contests {
+  id varchar [pk, not null, note: "Contest.ID"]
+  name varchar [not null]
+  description text
+  user_id varchar [note: "Reference to user who created the contest"]
+  is_up boolean [default: false]
+  max_votes_user int [default: 0]
+  Note: "Contest entity from internal/domain/contest/entity.go"
+}
+
+Table participants {
+  id varchar [pk, not null, note: "Participant.ID"]
+  contest_id varchar [not null]
+  email varchar [default: null]
+  nome varchar [not null]
+  telefone varchar [default: null]
+  title varchar [not null]
+  description text [default: null]
+  image_path varchar [not null]
+  Note: "Participant entity from internal/domain/contest/entity.go"
+}
+
+Table votes {
+  id varchar [pk, not null, note: "Vote.ID"]
+  contest_id varchar [not null]
+  participant_id varchar [not null]
+  voted_at timestamp [note: "Timestamp when the vote was cast"]
+  Note: "Vote entity from internal/domain/contest/entity.go"
+}
+
+Table vote_options {
+  id varchar [pk, not null]
+  contest_id varchar [not null]
+  vote_id varchar [not null] 
+  counter_option_id varchar [not null]
+  Note: "VoteOptions entity (ConterOptionID) — voter_id may reference a users table if present"
+}
+
+Ref: user.id < contests.user_id
+Ref: vote_options.vote_id < votes.id
+Ref: participants.contest_id > contests.id
+Ref: votes.contest_id > contests.id
+Ref: votes.participant_id > participants.id
+Ref: vote_options.contest_id > contests.id
+Ref: vote_options.counter_option_id > participants.id
