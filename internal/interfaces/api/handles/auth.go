@@ -124,10 +124,15 @@ func (h *AuthAPIHandler) RefreshToken(c fiber.Ctx) {
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to generate access token"})
 		return
 	}
+	refresh, err := h.jwtSvc.GenerateRefreshToken(userID)
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to generate refresh token"})
+		return
+	}
 
 	c.JSON(tokenResponse{
 		AccessToken:  accessToken,
-		RefreshToken: p.RefreshToken, // Keep the same refresh token
+		RefreshToken: refresh, // Keep the same refresh token
 		ExpiresIn:    h.jwtSvc.GetAccessTokenTTL(),
 	})
 }
