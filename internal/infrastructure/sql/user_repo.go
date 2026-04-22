@@ -17,6 +17,24 @@ func NewUserRepo(db *DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
+func (r *UserRepo) FindUserByPublicID(ctx context.Context, id string) (*user.User, error) {
+	const q = `
+		SELECT id, public_id, email, "passwordHash", "createAt", "changeAt"
+		FROM "user"
+		WHERE public_id = $1
+	`
+	u := &user.User{}
+	err := r.db.Pool.QueryRow(ctx, q, id).
+		Scan(&u.ID, &u.PublicID, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, user.ErrUserNotFound
+		}
+		return nil, err
+	}
+	return u, nil
+}
+
 func (r *UserRepo) SaveUser(ctx context.Context, dto *user.CreateUserDTO) (*user.User, error) {
 	u := &user.User{
 		PublicID: uuid.New().String(),

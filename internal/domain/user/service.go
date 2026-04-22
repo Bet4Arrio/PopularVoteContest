@@ -42,6 +42,10 @@ func (s *Service) CreateUser(ctx context.Context, name, email, plainPassword str
 	return s.repo.SaveUser(ctx, dto)
 }
 
+func (s *Service) GetUserByPublicID(ctx context.Context, id string) (*User, error) {
+	return s.repo.FindUserByPublicID(ctx, id)
+}
+
 func (s *Service) GetUserByID(ctx context.Context, id string) (*User, error) {
 	return s.repo.FindUserByID(ctx, id)
 }

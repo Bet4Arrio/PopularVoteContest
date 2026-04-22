@@ -7,6 +7,7 @@ import (
 	"github.com/PopularVote/config"
 
 	// infraauth "github.com/PopularVote/internal/infrastructure/auth"
+
 	infraauth "github.com/PopularVote/internal/infrastructure/auth"
 	sqlrepo "github.com/PopularVote/internal/infrastructure/sql"
 	apihandles "github.com/PopularVote/internal/interfaces/api/handles"
@@ -45,6 +46,16 @@ func main() {
 	authGroup.Post("/refresh", authHandler.RefreshToken)
 	authGroup.Get("/me", apimiddleware.JWTProtected(jwtSvc), authHandler.Me)
 
+	contestGroupp := api.Group("/contests", apimiddleware.JWTProtected(jwtSvc))
+	contestHandler := apihandles.NewContestHandler()
+	contestGroupp.Post("/", contestHandler.CreateContest)
+	contestGroupp.Get("/:id", contestHandler.GetContest)
+	contestGroupp.Get("/", contestHandler.ListContests)
+	contestGroupp.Put("/:id", contestHandler.UpdateContest)
+	contestGroupp.Post("/:id/participants", contestHandler.AddParticipant)
+	contestGroupp.Delete("/:id/participants/:participantId", contestHandler.RemoveParticipant)
+	contestGroupp.Get("/:id/pairs", contestHandler.ListPairtoVote)
+	contestGroupp.Post("/:id/vote", contestHandler.VoteParticipant)
 	// Here you would set up your API server and handlers, passing the database connection as needed.
 	log.Fatal(app.Listen(":" + cfg.App.Port))
 
