@@ -12,6 +12,8 @@ import (
 	apihandles "github.com/PopularVote/internal/interfaces/api/handles"
 	apimiddleware "github.com/PopularVote/internal/interfaces/api/middleware"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/logger"
+	"github.com/gofiber/fiber/v3/middleware/recover"
 )
 
 func main() {
@@ -24,7 +26,8 @@ func main() {
 	defer db.Close()
 	// 2. Inicializar Fiber
 	app := fiber.New()
-
+	app.Use(recover.New())
+	app.Use(logger.New())
 	// 3. Compartilhar o pool com as rotas
 	app.Use(func(c fiber.Ctx) error {
 		c.Locals("db", db)
