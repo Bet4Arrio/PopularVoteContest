@@ -17,6 +17,7 @@ func NewService(repo Repository) *Service {
 }
 
 func (s *Service) CreateContest(ctx context.Context, dto *CreateContestDTO) (Contest, error) {
+	// add validation and business logic here if needed
 	return s.repo.SaveContest(ctx, dto)
 }
 

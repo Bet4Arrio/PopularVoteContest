@@ -18,7 +18,12 @@ func NewDB(ctx context.Context, connString string) (*DB, error) {
 	if err := pool.Ping(ctx); err != nil {
 		return nil, err
 	}
-	return &DB{Pool: pool}, nil
+	db := &DB{Pool: pool}
+	err = Migrate(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
 }
 
 func (db *DB) Close() {

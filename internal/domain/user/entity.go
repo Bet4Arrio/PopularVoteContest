@@ -20,6 +20,7 @@ var (
 	ErrUserNotFound    = errors.New("user not found")
 	ErrEmailTaken      = errors.New("email already in use")
 	ErrInvalidRole     = errors.New("invalid role")
+	ErrInvalidName     = errors.New("invalid name")
 )
 
 // User is the aggregate root for the user domain.

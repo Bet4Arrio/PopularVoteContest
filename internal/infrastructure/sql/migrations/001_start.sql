@@ -1,25 +1,27 @@
 CREATE TABLE IF NOT EXISTS "user" (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "id" SERIAL PRIMARY KEY,
   "public_id" UUID UNIQUE,
   "email" VARCHAR,
   "passwordHash" VARCHAR,
-  "createAt" datetime,
-  "changeAt" datetime
+  "createAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  "changeAt" TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "contests" (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "id" SERIAL PRIMARY KEY,
   "public_id" UUID UNIQUE,
   "user_id" INTEGER,
   "name" varchar NOT NULL,
   "description" text,
   "is_up" boolean DEFAULT false,
   "max_votes_user" INTEGER DEFAULT 0,
+  "create_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  "change_at" TIMESTAMP,
   FOREIGN KEY ("user_id") REFERENCES "user" ("id") DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE IF NOT EXISTS "participants" (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "id" SERIAL PRIMARY KEY,
   "public_id" UUID UNIQUE,
   "contest_id" INTEGER NOT NULL,
   "email" varchar,
@@ -32,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "participants" (
 );
 
 CREATE TABLE IF NOT EXISTS "votes" (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "id" SERIAL PRIMARY KEY,
   "contest_id" INTEGER NOT NULL,
   "participant_id" INTEGER NOT NULL,
   "voter_hash" varchar NULL,
@@ -44,7 +46,7 @@ CREATE TABLE IF NOT EXISTS "votes" (
 );
 
 CREATE TABLE IF NOT EXISTS "vote_options" (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "id" SERIAL PRIMARY KEY,
   "contest_id" INTEGER NOT NULL,
   "vote_id" INTEGER NOT NULL,
   "counter_option_id" UUID NOT NULL,

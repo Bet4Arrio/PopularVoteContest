@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: popularvote_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: popularvote
+      POSTGRES_PASSWORD: popularvotepassword
+      POSTGRES_DB: popularvote
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U popularvote -d popularvote"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: popularvote_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+      MINIO_BUCKET_NAME: popularvote
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  minio_data:

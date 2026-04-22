@@ -1,18 +1,27 @@
-package api
+package main
 
 import (
 	"context"
+	"log"
 
+	"github.com/PopularVote/config"
+
+	// infraauth "github.com/PopularVote/internal/infrastructure/auth"
+	infraauth "github.com/PopularVote/internal/infrastructure/auth"
 	sqlrepo "github.com/PopularVote/internal/infrastructure/sql"
+	apihandles "github.com/PopularVote/internal/interfaces/api/handles"
+	apimiddleware "github.com/PopularVote/internal/interfaces/api/middleware"
 	"github.com/gofiber/fiber/v3"
 )
 
 func main() {
-
-	db, err := sqlrepo.NewDB(context.Background(), "postgres://postgres:password@localhost:5432/postgres")
+	cfg := config.Load()
+	// 1. Inicializar o pool de conexões
+	db, err := sqlrepo.NewDB(context.Background(), cfg.DB.DSN)
 	if err != nil {
 		panic(err)
 	}
+	defer db.Close()
 	// 2. Inicializar Fiber
 	app := fiber.New()
 
@@ -21,7 +30,19 @@ func main() {
 		c.Locals("db", db)
 		return c.Next()
 	})
+	jwtSvc := infraauth.NewJWTService(cfg.JWT.Secret, cfg.JWT.AccessTokenTTL, cfg.JWT.RefreshTokenTTL)
+	app.Get("/", func(c fiber.Ctx) error {
+		return c.SendString("Welcome to the Popular Vote API!")
+	})
+	api := app.Group("/api")
+	authHandler := apihandles.NewAuthAPIHandler(jwtSvc)
+	authGroup := api.Group("/auth")
+	authGroup.Post("/register", authHandler.Register)
+	authGroup.Post("/login", authHandler.Login)
+	authGroup.Post("/refresh", authHandler.RefreshToken)
+	authGroup.Get("/me", apimiddleware.JWTProtected(jwtSvc), authHandler.Me)
 
 	// Here you would set up your API server and handlers, passing the database connection as needed.
+	log.Fatal(app.Listen(":" + cfg.App.Port))
 
 }

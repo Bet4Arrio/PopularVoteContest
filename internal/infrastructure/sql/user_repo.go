@@ -17,8 +17,8 @@ func NewUserRepo(db *DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
-func (r *UserRepo) SaveUser(ctx context.Context, dto *user.CreateUserDTO) (user.User, error) {
-	u := user.User{
+func (r *UserRepo) SaveUser(ctx context.Context, dto *user.CreateUserDTO) (*user.User, error) {
+	u := &user.User{
 		PublicID: uuid.New().String(),
 		Email:    dto.Email,
 	}
@@ -30,7 +30,7 @@ func (r *UserRepo) SaveUser(ctx context.Context, dto *user.CreateUserDTO) (user.
 	`
 	row := r.db.Pool.QueryRow(ctx, q, u.PublicID, dto.Email, dto.Password)
 	if err := row.Scan(&u.ID, &u.PublicID, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt); err != nil {
-		return user.User{}, err
+		return nil, err
 	}
 	return u, nil
 }
