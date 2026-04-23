@@ -66,28 +66,28 @@ func (h *AuthAPIHandler) Register(c fiber.Ctx) error {
 }
 
 // Login handles user login and JWT issuance.
-func (h *AuthAPIHandler) Login(c fiber.Ctx) {
+func (h *AuthAPIHandler) Login(c fiber.Ctx) error {
 	p := new(LoginRequest)
 	if err := c.Bind().JSON(p); err != nil {
-		return
+		return err
 	}
 	db := c.Locals("db").(*sqlrepo.DB)
 	repo := sqlrepo.NewUserRepo(db)
 	userService := user.NewService(repo)
 	authenticatedUser, err := userService.AuthenticateUser(c.Context(), p.Email, p.Password)
 	if err != nil {
-		return
+		return err
 	}
 
 	acess, err := h.jwtSvc.GenerateAccessToken(authenticatedUser.PublicID, authenticatedUser.Email)
 	if err != nil {
-		return
+		return err
 	}
 	refresh, err := h.jwtSvc.GenerateRefreshToken(authenticatedUser.PublicID)
 	if err != nil {
-		return
+		return err
 	}
-	c.JSON(tokenResponse{
+	return c.JSON(tokenResponse{
 		AccessToken:  acess,
 		RefreshToken: refresh,
 		ExpiresIn:    h.jwtSvc.GetAccessTokenTTL(),

@@ -1,0 +1,24 @@
+meta {
+  name: Create Contest
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/contests
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "My Contes2t",
+    "description": "A description for my contest",
+    "max_votes": 3
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

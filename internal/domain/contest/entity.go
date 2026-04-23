@@ -4,9 +4,10 @@ package contest
 type Contest struct {
 	ID           int    ` json:"id"`
 	PublicID     string `json:"public_id"` // UUID for external reference
+	UserId       string // Reference to the user who created the contest
+	UserPublicID string `json:"user_public_id"` // Public ID of the user who created the contest
 	Name         string `json:"name"`
 	Description  string `json:"description"`
-	UserId       string `json:"user_id"`   // Reference to the user who created the contest
 	IsUp         bool   `json:"is_up"`     // Indicates if the contest is active or not
 	MaxVotesUser int    `json:"max_votes"` // Maximum number of votes per user for this contest
 	// Add more fields as needed, e.g., StartDate, EndDate, etc.

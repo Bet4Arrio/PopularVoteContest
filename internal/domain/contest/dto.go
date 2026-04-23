@@ -1,10 +1,10 @@
 package contest
 
-type CreateContestDTO struct {
+type CreateContestCommand struct {
+	UserID      int    `json:"user_id" validate:"required"`
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
-	StartDate   string `json:"start_date" validate:"required,datetime=2006-01-02T15:04:05Z07:00"`
-	EndDate     string `json:"end_date" validate:"required,datetime=2006-01-02T15:04:05Z07:00,gtfield=StartDate"`
+	MaxVotes    int    `json:"max_votes" validate:"gt=0"`
 }
 
 type CreateParticipantDTO struct {

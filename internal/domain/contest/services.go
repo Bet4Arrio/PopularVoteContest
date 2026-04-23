@@ -16,17 +16,36 @@ func NewService(repo Repository) *Service {
 	return &Service{repo: repo, acessToken: make(map[string]int)}
 }
 
-func (s *Service) CreateContest(ctx context.Context, dto *CreateContestDTO) (Contest, error) {
+func (s *Service) CreateContest(ctx context.Context, user_id int, name string, description string, maxVotes int) (Contest, error) {
 	// add validation and business logic here if needed
+	if name == "" {
+		return Contest{}, fmt.Errorf("name is required")
+	}
+	if description == "" {
+		return Contest{}, fmt.Errorf("description is required")
+	}
+	dto := &CreateContestCommand{
+		UserID:      user_id,
+		Name:        name,
+		Description: description,
+		MaxVotes:    maxVotes,
+	}
 	return s.repo.SaveContest(ctx, dto)
 }
 
+func (s *Service) GetContestByPublicIDandUserID(ctx context.Context, publicID string, userID string) (*Contest, error) {
+	return s.repo.FindContestByPublicIDandUserID(ctx, publicID, userID)
+}
 func (s *Service) GetContestByID(ctx context.Context, id string) (*Contest, error) {
 	return s.repo.FindContestByID(ctx, id)
 }
 
 func (s *Service) GetAllContests(ctx context.Context) ([]*Contest, error) {
 	return s.repo.FindAllContests(ctx)
+}
+func (s *Service) ListContestUserID(ctx context.Context, userID string) ([]*Contest, error) {
+	// This function is not implemented in the repository, so we return an empty slice for now.
+	return s.repo.FindAllContestsByUserID(ctx, userID)
 }
 
 func (s *Service) GetContestWithParticipants(ctx context.Context, contestID string) (*ContestWithParticipants, error) {

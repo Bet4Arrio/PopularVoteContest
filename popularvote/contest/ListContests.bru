@@ -1,0 +1,16 @@
+meta {
+  name: List Contests
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/contests
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

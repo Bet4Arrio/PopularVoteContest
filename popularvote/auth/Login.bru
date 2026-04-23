@@ -6,8 +6,15 @@ meta {
 
 post {
   url: http://localhost:3000/api/auth/login
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "email":"emanuel@modularia.com.br",
+    "password":"senha"
+  }
 }
 
 settings {

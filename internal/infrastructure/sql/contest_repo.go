@@ -3,6 +3,7 @@ package sqlrepo
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/PopularVote/internal/domain/contest"
@@ -19,15 +20,16 @@ func NewContestRepo(db *DB) *ContestRepo {
 }
 
 // SaveContest inserts a new contest and returns it.
-func (r *ContestRepo) SaveContest(ctx context.Context, dto *contest.CreateContestDTO) (contest.Contest, error) {
+func (r *ContestRepo) SaveContest(ctx context.Context, dto *contest.CreateContestCommand) (contest.Contest, error) {
 	const q = `
-		INSERT INTO contests (public_id, name, description, is_up, max_votes_user)
-		VALUES ($1, $2, $3, false, 0)
-		RETURNING id, public_id, name, description, is_up, max_votes_user
+		INSERT INTO contests (public_id, user_id, name, description, is_up, max_votes_user)
+		VALUES ($1, $2, $3, $4, false, $5)
+		RETURNING id, public_id, user_id, name, description, is_up, max_votes_user
 	`
+	log.Printf("Saving contest: %+v", dto)
 	c := contest.Contest{PublicID: uuid.New().String()}
-	err := r.db.Pool.QueryRow(ctx, q, c.PublicID, dto.Name, dto.Description).
-		Scan(&c.ID, &c.PublicID, &c.Name, &c.Description, &c.IsUp, &c.MaxVotesUser)
+	err := r.db.Pool.QueryRow(ctx, q, c.PublicID, dto.UserID, dto.Name, dto.Description, dto.MaxVotes).
+		Scan(&c.ID, &c.PublicID, &c.UserId, &c.Name, &c.Description, &c.IsUp, &c.MaxVotesUser)
 	if err != nil {
 		return contest.Contest{}, err
 	}
@@ -53,10 +55,52 @@ func (r *ContestRepo) FindContestByID(ctx context.Context, id string) (*contest.
 	return c, nil
 }
 
+func (r *ContestRepo) FindContestByPublicIDandUserID(ctx context.Context, publicID string, userID string) (*contest.Contest, error) {
+	const q = `
+		SELECT c.id, c.public_id, c.name, c.description, c.is_up, c.max_votes_user
+		FROM contests c
+		JOIN "user" u ON u.id = c.user_id
+		WHERE c.public_id = $1 AND u.public_id = $2
+	`
+	c := &contest.Contest{}
+	err := r.db.Pool.QueryRow(ctx, q, publicID, userID).
+		Scan(&c.ID, &c.PublicID, &c.Name, &c.Description, &c.IsUp, &c.MaxVotesUser)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return c, nil
+}
+
 // FindAllContests returns every contest.
 func (r *ContestRepo) FindAllContests(ctx context.Context) ([]*contest.Contest, error) {
 	const q = `SELECT id, public_id, name, description, is_up, max_votes_user FROM contests`
 	rows, err := r.db.Pool.Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []*contest.Contest
+	for rows.Next() {
+		c := &contest.Contest{}
+		if err := rows.Scan(&c.ID, &c.PublicID, &c.Name, &c.Description, &c.IsUp, &c.MaxVotesUser); err != nil {
+			return nil, err
+		}
+		list = append(list, c)
+	}
+	return list, rows.Err()
+}
+func (r *ContestRepo) FindAllContestsByUserID(ctx context.Context, userPublicID string) ([]*contest.Contest, error) {
+	const q = `
+		SELECT c.id, c.public_id, c.name, c.description, c.is_up, c.max_votes_user
+		FROM contests c
+		JOIN "user" u ON u.id = c.user_id
+		WHERE u.public_id = $1
+	`
+	rows, err := r.db.Pool.Query(ctx, q, userPublicID)
 	if err != nil {
 		return nil, err
 	}
