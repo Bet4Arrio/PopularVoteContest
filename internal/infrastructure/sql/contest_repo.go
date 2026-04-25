@@ -39,13 +39,13 @@ func (r *ContestRepo) SaveContest(ctx context.Context, dto *contest.CreateContes
 // FindContestByID returns a contest by its public UUID.
 func (r *ContestRepo) FindContestByID(ctx context.Context, id string) (*contest.Contest, error) {
 	const q = `
-		SELECT id, public_id, name, description, is_up, max_votes_user
+		SELECT id, public_id, user_id, name, description, is_up, max_votes_user
 		FROM contests
 		WHERE public_id = $1
 	`
 	c := &contest.Contest{}
 	err := r.db.Pool.QueryRow(ctx, q, id).
-		Scan(&c.ID, &c.PublicID, &c.Name, &c.Description, &c.IsUp, &c.MaxVotesUser)
+		Scan(&c.ID, &c.PublicID, &c.UserId, &c.Name, &c.Description, &c.IsUp, &c.MaxVotesUser)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
@@ -278,4 +278,20 @@ func (r *ContestRepo) CountContestVotesFromVoterHash(ctx context.Context, contes
 	var count int
 	err := r.db.Pool.QueryRow(ctx, q, contestID, voterHash).Scan(&count)
 	return count, err
+}
+
+func (r *ContestRepo) UpdateContest(ctx context.Context, c *contest.Contest) (*contest.Contest, error) {
+	const q = `
+		UPDATE contests
+		SET name = $2, description = $3, is_up = $4, max_votes_user = $5
+		WHERE public_id = $1
+		RETURNING id, public_id, user_id, name, description, is_up, max_votes_user
+	`
+	err := r.db.Pool.QueryRow(ctx, q,
+		c.PublicID, c.Name, c.Description, c.IsUp, c.MaxVotesUser,
+	).Scan(&c.ID, &c.PublicID, &c.UserId, &c.Name, &c.Description, &c.IsUp, &c.MaxVotesUser)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
 }

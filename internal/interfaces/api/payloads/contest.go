@@ -6,6 +6,13 @@ type CreateContestRequest struct {
 	MaxVotes    int    `json:"max_votes" validate:"gt=0"`
 }
 
+type UpdateContestRequest struct {
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	IsUp        *bool   `json:"is_up,omitempty"`
+	MaxVotes    *int    `json:"max_votes,omitempty" validate:"omitempty,gt=0"`
+}
+
 type ContestResponse struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`

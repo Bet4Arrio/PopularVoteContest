@@ -9,6 +9,7 @@ type Repository interface {
 	SaveParticipant(ctx context.Context, participant *CreateParticipantDTO) (Participant, error)
 	FindContestByID(ctx context.Context, id string) (*Contest, error)
 	FindContestByPublicIDandUserID(ctx context.Context, publicID string, userID string) (*Contest, error)
+	UpdateContest(ctx context.Context, contest *Contest) (*Contest, error)
 	FindAllContests(ctx context.Context) ([]*Contest, error)
 	FindAllContestsByUserID(ctx context.Context, userPublicID string) ([]*Contest, error)
 	FindAllParticipantsByContestID(ctx context.Context, contestID string) ([]*Participant, error)

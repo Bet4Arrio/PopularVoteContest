@@ -4,7 +4,7 @@ package contest
 type Contest struct {
 	ID           int    ` json:"id"`
 	PublicID     string `json:"public_id"` // UUID for external reference
-	UserId       string // Reference to the user who created the contest
+	UserId       int    // Reference to the user who created the contest
 	UserPublicID string `json:"user_public_id"` // Public ID of the user who created the contest
 	Name         string `json:"name"`
 	Description  string `json:"description"`

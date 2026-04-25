@@ -102,3 +102,25 @@ func (s *Service) GetContestAcesstoken(ctx context.Context, contestID string) (s
 	// Assuming the access ID is the same as the public ID for simplicity
 	return contest.PublicID, nil
 }
+
+func (s *Service) UpdateContest(ctx context.Context, contestID string, name *string, description *string, isUp *bool, maxVotes *int) (*Contest, error) {
+	contest, err := s.repo.FindContestByID(ctx, contestID)
+	if err != nil {
+		return nil, fmt.Errorf("contest not found: %w", err)
+	}
+	if name != nil {
+		contest.Name = *name
+	}
+	if description != nil {
+		contest.Description = *description
+	}
+	if isUp != nil {
+		contest.IsUp = *isUp
+	}
+	if maxVotes != nil {
+		contest.MaxVotesUser = *maxVotes
+	}
+	// Here you would typically call a repository method to update the contest in the database.
+	// For example: return s.repo.UpdateContest(ctx, contest)
+	return s.repo.UpdateContest(ctx, contest)
+}
